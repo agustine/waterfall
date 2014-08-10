@@ -32,14 +32,21 @@ var Waterfall = (function(){
 		minWidth: 100,
 
 		// ajax配置
+        ajaxDataType: 'json', // ajax接口数据类型
+
+		// ajax接口url模版
+        // 如果使用了这个配置，并且所配置的字符串中存在{{pno}}，则ajaxUrl与ajaxData失效
+        // 会使用当前页码替换'{{pno}}'作为接口的url
+        // 例如 '/data?pno={{pno}}&param1=XX&param2=XXX'，则使用'/data?pno=1&param1=XX&param2=XXX'作为第一页的请求url
+        ajaxUrlTemplate: '',
+
 		ajaxUrl: '', // ajax接口url
-		ajaxDataType: 'json', // ajax接口数据类型
 		ajaxData: {}, // ajax接口参数（除当前页参数）
+        pageIndexName: 'pno', // ajax接口页码参数名称
 
 		// 起始页码，有些ajax接口页码从1开始
 		startPageIndex: 0,
-		// ajax接口页码参数名称
-		pageIndexName: 'pno',
+
 		// 水滴water容器的tagName
 		// 得到图片数据后，会生产一个该tagName的元素
 		// 使用template方法生成dom，插入到该元素
@@ -103,25 +110,29 @@ var Waterfall = (function(){
 			// 是否加载中，用来作一个同步锁，防止用户在前一次请求的图片还没加载的情况下加载下一页
 			loading = false,
 			// 水滴宽度
-			waterWidth, 
+			waterWidth,
 			// 列高度数组
-			columns, 
+			columns,
 			// 已加载的图片数据数组
 			waters = [],
-			// 水滴中的图片宽度 
-			imgWidth, 
+			// 水滴中的图片宽度
+			imgWidth,
 			// 瀑布流容器
-			wrapper, 
+			wrapper,
 			// 当前高度最小的列的index
-			minColumn = 0, 
+			minColumn = 0,
 			// 当前列数
 			columnsCount = 0,
 			// 是否已经没有下一页的数据
-			noMore = false, 
+			noMore = false,
 			// 是否固定列数
-			fixed, 
+			fixed,
 			// 瀑布流容器的宽度
-			wrapperWidth;
+			wrapperWidth,
+            // 是否使用urltemplate方式
+            isUrlTemplate,
+            // url template 页码替换正则
+            re = /\{\{pno\}\}/gi;
 	// 浏览器console log方法
 	var log = (console && console.log) ? function(msg){ console.log(msg); } : function(msg){};
 
@@ -396,6 +407,8 @@ var Waterfall = (function(){
 	 * 加载数据
 	 */
 	function load(){
+        var url = options.ajaxUrl,
+            params = ajaxParams();
 		// 判断是否有另一页在加载
 		if(loading){
 			log('Another request of waterfall is processing...');
@@ -407,9 +420,16 @@ var Waterfall = (function(){
 			options.noMore();
 			return false;
 		}
+
+        // 接口url判断
+        if(isUrlTemplate){
+            url = options.ajaxUrlTemplate.replace(re, pageIndex.toString());
+            params = {};
+        }
+
 		// 请求数据
-		$.ajax(options.ajaxUrl, {
-			data: ajaxParams(), 
+		$.ajax(url, {
+			data: params,
 			dataType: options.ajaxDataType, 
 			type: 'GET',
 			beforeSend: loadStart,
@@ -430,6 +450,9 @@ var Waterfall = (function(){
 
 		// 获取容器
 		wrapper = document.getElementById(elemId);
+
+        // 是否使用url template
+        isUrlTemplate = options.ajaxUrlTemplate && re.test(options.ajaxUrlTemplate);
 
 		// 设置页码开始值
 		pageIndex = options.startPageIndex;
