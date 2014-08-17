@@ -149,7 +149,7 @@ var Waterfall = (function(){
 		// 当前高度最大列的高度加上配置的留白高度，
 		// 算出瀑布流容器该有的高度，并设定其高度
 		var wrapperHeight = (maxH + options.whiteBottom);
-		wrapper.style.height = wrapperHeight.toString() + 'px';
+        wrapper.style.height = wrapperHeight.toString() + 'px';
 
 		// 计算当前高度最小的列的index
 		var columnCount = columns.length;
@@ -272,25 +272,25 @@ var Waterfall = (function(){
 
 		// 从response中解析出图片数组数组
 		var pageData = options.parse(res);
-		// response中的图片数
-		var pageCount = pageData.length;
 
 		// 单个图片数据
-		var item, 
-				url, // 图片url
-				img;	// 图片element
+		var item,
+            pageCount, // response中的图片数
+            url, // 图片url
+			img;	// 图片element
 
 		// 图片加载完成的个数
 		var done = 0;
 
-		// 设置是否是最后一页
-		noMore = options.last(res);
-
 		// 判断解析出的数据是否是数组
-		if(!(pageData instanceof Array)){
+		if((!pageData) || (!(pageData instanceof Array))){
 			log('data parse error!');
 			return;
 		}
+        // 设置是否是最后一页
+        noMore = options.last(res);
+        // response中的图片数
+        pageCount = pageData.length;
 
 		// 遍历图片数据
 		for(var i = 0; i < pageCount; i++){
@@ -351,7 +351,7 @@ var Waterfall = (function(){
 		var waterCount, itemDoms, elem, item;
 		// 判断是否传入了列数参数，已确定是否固定列数（fixed）
 		fixed = cols ? true : fixed;
-
+        cols = cols || options.cols;
 		// 重置列数
 		cols = cols || columnsCount;
 
@@ -445,6 +445,7 @@ var Waterfall = (function(){
 	 */
 	function Waterfall(elemId, settings){
 		var i, timeout;
+        this.height = 0;
 		// 获取配置
 		for (i in settings) options[i] = settings[i];
 

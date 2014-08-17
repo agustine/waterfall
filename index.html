@@ -1,102 +1,121 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title>瀑布流</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-touch-fullscreen" content="yes" />
-  <link rel="stylesheet" type="text/css" href="../cssReset/reset.css">
-  <style type="text/css">
-    #water_fall{
-      position: absolute;
-      display: block;
-      width: 100%;
-      top: 0;
-      bottom: 0;
-      text-align: center;
-      font-size: 0;
-    }
-    #water_fall li{
-      
-    }
-    #water_fall a{
-      position: relative;
-      display: block;
-      border: 1px solid #666666;
-      border-bottom: 31px solid #666666;
-    }
-    #water_fall img{
-      width:100%;
-    }
-    #water_fall span{
-      position: absolute;
-      width: 100%;
-      height: 30px;
-      overflow: hidden;
-      left: -1px;
-      bottom: -31px;
-      line-height: 30px;
-      color: #FFFFFF;
-      font-size: 15px;
-    }
-  </style>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>瀑布流</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <link rel="stylesheet" type="text/css" href="reset.css">
+    <style type="text/css">
+        #water_fall {
+            position: absolute;
+            display: block;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            text-align: center;
+            font-size: 0;
+            min-height: 110%;
+        }
+
+        #water_fall li {
+
+        }
+
+        #water_fall a {
+            position: relative;
+            display: block;
+            border: 1px solid #666666;
+            border-bottom: 31px solid #666666;
+        }
+
+        #water_fall img {
+            width: 100%;
+        }
+
+        #water_fall span {
+            position: absolute;
+            width: 100%;
+            height: 30px;
+            overflow: hidden;
+            left: -1px;
+            bottom: -31px;
+            line-height: 30px;
+            color: #FFFFFF;
+            font-size: 15px;
+        }
+    </style>
 </head>
 <body>
-  <ul id="water_fall">
+<ul id="water_fall">
 
-  </ul>
-  <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="waterfall.js"></script>
-  <script type="text/javascript">
-    $(function(){
-      waterfall = new Waterfall('water_fall', {
-          margin: 5,
-          offsetH: 2,
-          offsetV: 32,
-          whiteBottom: 50,
+</ul>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="waterfall.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var clientHeight = window.innerHeight
+            || document.documentElement.clientHeight
+            || document.body.clientHeight;
+        var waterfall = new Waterfall('water_fall', {
+            margin: 5,
+            offsetH: 2,
+            offsetV: 32,
+            whiteBottom: 50,
 
-          cols: 0,
-          minWidth: 150,
+            cols: 5,
+            minWidth: 0,
 
-          ajaxUrl: 'http://192.168.1.32:8098/getSingleImages',
-          ajaxDataType: 'jsonp',
-          ajaxData: {
-            cid: 62, 
-            subid: 0,
-            psize: 10
-          },
 
-          startPageIndex: 1,
-          pageIndexName: 'pno',
-          waterBox: 'li',
-          parse: function(res){
-            return res.returnValue.items;
-          },
-          url: function(item){
-            return item.cover;
-          },
-          template: function(imgData){
-            var domStr = '<a href="javascript:void(0)">';
-            domStr += '<img src="' + imgData.cover + '">'
-            domStr += '<span>美女啊啊啊啊啊啊啊啊啊啊啊啊啊</span>'
-            domStr += '</a>';
-            return domStr;
-          },
-          pageLoaded: function(res){
-          },
-          itemRendered: function(item){
-          },
-          last: function(res){
-            return res.returnValue.pageIndex >= (res.returnValue.pageCount - 1);
-          },
-          noMore: function(){
-            alert('no more images...');
-          }
-      });
+            ajaxUrlTemplate: 'example_data/page{{pno}}.json',
+
+            ajaxUrl: '',
+            ajaxDataType: 'json',
+            ajaxData: {
+                cid: 62,
+                subid: 0,
+                psize: 10
+            },
+
+            startPageIndex: 0,
+            pageIndexName: 'pno',
+            waterBox: 'li',
+            parse: function (res) {
+                if (!(res && res.success)) {
+                    return false;
+                }
+                return res.data.images;
+            },
+            url: function (item) {
+                return item.pic;
+            },
+            template: function (imgData) {
+                var domStr = '<a href="javascript:void(0)">';
+                domStr += '<img src="' + imgData.pic + '">'
+                domStr += '<span>' + imgData.title + '</span>'
+                domStr += '</a>';
+                return domStr;
+            },
+            pageLoaded: function (res) {
+            },
+            itemRendered: function (item) {
+            },
+            last: function (res) {
+                return res.data.pageIndex >= (res.data.pageCount - 1);
+            },
+            noMore: function () {
+                alert('没有更多图片');
+            }
+        });
+        window.onscroll = function(){
+            if((clientHeight + window.scrollY) >= $('#water_fall').height())
+                waterfall.loadMore();
+        };
     });
-  </script>
+</script>
 </body>
 </html>
